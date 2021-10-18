@@ -1,0 +1,3 @@
+[targets]
+localhost              ansible_connection=local
+#ecc-linux.csuchico.edu ansible_connection=ssh ansible_user=bcdixon ansible_python_interpreter="/usr/bin/python3"
