@@ -1,12 +1,47 @@
 ---
-- name: My task
+- name: Upgrade Computer
   hosts: all
   tasks:
-     - name: Leaving a mark
-       command: "touch /tmp/ansible_was_here"
-     - name: Upgrade the OS
-       become: yes 
+     - debug:
+          var: ansible_facts
+     - name: Update and upgrade the OS
+       become: yes
        apt:
           update_cache: yes
           upgrade: yes
           autoremove: yes
+       when: ansible_facts["pkg_mgr"] == "apt"
+
+- name: Install NGINX
+  gather_facts: false
+  hosts: all
+  tasks:
+    - name: Install a NGINX
+      become: "yes"
+      apt:
+        name: "{{ packages }}"
+        update_cache: "yes"
+      vars:
+        packages:
+        - nginx
+
+- name: Create User
+  gather_facts: false
+  hosts: all
+  tasks:
+    - name: Add the user 'johnd'
+      become: true
+      ansible.builtin.user:
+        name: johnd
+        comment: John Doe
+        shell: /bin/bash
+        password: $1$SomeSalt$GeiX8X5vXsCoyilpMJP3A1
+        generate_ssh_key: yes
+        ssh_key_bits: 8192
+        ssh_key_file: .ssh/id_rsa
+    - name: Set authorized key
+      become: true
+      ansible.posix.authorized_key:
+        user: johnd
+        state: absent
+        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAEAQDfvt1YeKvuUAcjRDyXkjhJffKzABzir4sqT+m94s22BRv8b3NbGCiYXGAs3th95pJhVep+mbvrnmLGVSzN7kDSB+f3jgcf6PjziQC9h0wLBsMu1BKiOdIC11HoULUmIi2HpIQhBATyl8SgPHsPPon8Rj6wKkZQTHhHWNyHvvsf3DiXPF0gLNSXZolu23UH/AG0eCGPFpHgC7s9ROZ+woOVwOFVJQ4dUPlgqBidbHLoi/UQOPi9yX4Du4MOMzB7h33iT8+dFHfIT0q4LA0nEzqvBhn++WFeWN8+pM7fwcsmbtEjYXRouubESgm2O6uSnd9OqLgpRUbhTrPGv/JYycudzrMnGaZAEm4BO/jYzAR3w1pnaxFKOBQPOCHrsYZhXXHYNNyohTbBHzkLiA35q/zz6j9fPmkBuWJkgT2dcYjy/m4aQ5myk7dO6zC4DxVUddHJJHezu6kLmuATy8bJbeHp5w1zgRNgYRnZvmOvj8p8xrai0nZdCXt/cmXSrEICs1u9VLF+JrRp0hfkSUJ1aVJ8pLuK/TZkeNjI63XEtcw3/spz9XwgEmN6v1eg1be++9j7suSpkA8qE8+ZPtOuMBHqbuNBp8/88lDW2xIPPXvSqP6a+4WBCuDkMhwgegq3kxkgD7kX1mbD4rJJbqshwnU6LKduDzcfoYacWqF/luhjmrK6NoN5sbeJJJxMshF1EFasOZEQVVgD9kR7hyxCHefpvYC/Ri6/e4qYgidtAmZ56KwzUlQdsmtFl5waNaQEcLq5Nrexuz0s4hTqugsEpRXmTr93kftB8qhvYIEwfi8ZMu5jDDQ6OUEqoUr88qc4YDmVQBy0//Gs02nXkOqLPN5Ij0/ayQF8pMDMoHg0QRJArWAGOMiyPaNZ6d30tm1WfFWFbZXEeFpjwTKsgD9T5UYpTAST24bvhhY1qHEYs+ApxJli8iq1TuO02cAmx3+AdT660ZMP0XKmgPEkeBCHuwgpdMl0T9tX5pzAHBr2r897mr8bhc/cuePgFsQGOgWlMbWFhms6RKm7OcK/JQkPSIPDk9NRRPg6XiHC+nJ5TQqzP/cITXTYUdERBYNcP7uJAtmyWjKZ0/Mm7/ISOkBHgN3i4ib7k4TpChkOA5S8wt2P4bA/emBFO7igBZvggtQhqZKFUfqIumIAMInVCt52XwZEHuSwRELTUixuYE5eEkEexAwdEU3DW00Umf2ZEjSCXWWaWB7mB4CJ3taFdd4LBrfRCA+6GV8Ea/6DfR85nPF6nQJV536h98o49WowgmNDo+FuXmLmx/R5sAlv7FH57Suk9OgeryXilCEuMsvSJ+JaSJgoIuNCNQ87sSkoBRAOykq/UFqkZ2us4h2fqO9Yevsh bryandixon@S59671"
