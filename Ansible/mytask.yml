@@ -29,6 +29,26 @@
   gather_facts: false
   hosts: all
   tasks:
+    - name: Get user 'johnd' key length
+      become: true
+      shell: echo $(ssh-keygen -l -f /home/johnd/.ssh/id_rsa.pub | awk '{ print $1 }')
+      register: key_length
+    - name: Print key_length
+      ansible.builtin.debug:
+        msg: "{{key_length.stdout | int}}"
+      when: key_length is defined
+    - name: Remove file pub key for johnd if too small
+      become: true
+      ansible.builtin.file:
+        path: /home/johnd/.ssh/id_rsa.pub
+        state: absent
+      when: (key_length.stdout | int) < 8192
+    - name: Remove file pub key for johnd if too small
+      become: true
+      ansible.builtin.file:
+        path: /home/johnd/.ssh/id_rsa
+        state: absent
+      when: (key_length.stdout | int) < 8192
     - name: Add the user 'johnd'
       become: true
       ansible.builtin.user:
